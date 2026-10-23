@@ -70,6 +70,14 @@ This document explains the claims triage workflow in plain, accessible terms wit
   - **Why R12 Reports Even When Evaluation Stops Early:**
     If a tool fails or extraction is impossible, the workflow terminates evaluation early to avoid evaluating missing facts. However, security tripwires must never be silenced by external outages or corrupted files. Reporting R12 ensures security incidents are captured in the immutable audit trail and decision record.
 
+---
+
+## T7: LLM Layer with Record and Replay
+- **What was done:** Built `src/triage/llm.py` supporting `live`, `record`, `replay`, and `oracle` modes. Created versioned prompt templates `prompts/extract_v1.md` and `prompts/assess_v1.md`. Wrapped claim text between fixed markers (Security requirement S1). Implemented exponential backoff for transient 429/5xx errors, cassette hashing, and the `CassetteMiss` exception.
+- **Review Question - What CassetteMiss Means and Why Replay Never Falls Back to Live:**
+  A `CassetteMiss` means the exact request (canonical SHA-256 hash of the node, model, system prompt, user prompt, and schema) does not exist in the recorded cassette. This is an intentional tripwire: it proves that either a prompt changed, an input changed, or an unexpected call occurred. Replay mode strictly forbids falling back to live API calls so that CI runs remain 100% deterministic, free, and offline. Falling back to live would silently burn API tokens and hide prompt drift or unexpected model queries.
+
+
 
 
 
