@@ -1,0 +1,96 @@
+{
+  "case_id": "CASE-30",
+  "category": "missing documents",
+  "claim_id": "CLM70000030",
+  "submission_text": "Claim CLM70000030 for PX0008 missing required referral documentation.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 50000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700030",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [
+      {
+        "plan_id": "PLN001",
+        "procedure_code": "PX0008",
+        "covered": 1,
+        "requires_preauth": 0,
+        "max_allowed": null
+      }
+    ],
+    "claims": [
+      {
+        "claim_id": "CLM70000030",
+        "member_id": "M700030",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0008",
+        "diagnosis_code": "R05",
+        "service_date": "2026-05-10",
+        "submitted_on": "2026-05-20",
+        "billed_amount": 480.0,
+        "allowed_amount": 480.0,
+        "paid_amount": null,
+        "status": "SUBMITTED"
+      }
+    ],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000030",
+    "member_id": "M700030",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0008",
+    "procedure_description": "Therapy procedure missing referral slip",
+    "billed_amount": 480.0,
+    "service_date": "2026-05-10",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Mandatory required physician referral documentation is missing.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0008",
+        "effect": "supports",
+        "quote": "Preventive screening and diagnostic colonoscopy provides endoscopic evaluation of the lower gastrointestinal tract"
+      }
+    ],
+    "missing_items": [
+      "referral"
+    ],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "STANDARD_REVIEW",
+    "rule_ids": [
+      "R14"
+    ],
+    "injection_flagged": false
+  }
+}

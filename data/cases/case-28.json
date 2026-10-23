@@ -1,0 +1,107 @@
+{
+  "case_id": "CASE-28",
+  "category": "annual limit exhausted",
+  "claim_id": "CLM70000028",
+  "submission_text": "Claim CLM70000028 for member M700028 with exhausted policy limit.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 5000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700028",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [
+      {
+        "plan_id": "PLN001",
+        "procedure_code": "PX0002",
+        "covered": 1,
+        "requires_preauth": 0,
+        "max_allowed": null
+      }
+    ],
+    "claims": [
+      {
+        "claim_id": "CLM70000028",
+        "member_id": "M700028",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0002",
+        "diagnosis_code": "R05",
+        "service_date": "2026-05-10",
+        "submitted_on": "2026-05-20",
+        "billed_amount": 400.0,
+        "allowed_amount": 400.0,
+        "paid_amount": null,
+        "status": "SUBMITTED"
+      },
+      {
+        "claim_id": "CLM70000078",
+        "member_id": "M700028",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0001",
+        "diagnosis_code": "R05",
+        "service_date": "2026-02-01",
+        "submitted_on": "2026-02-10",
+        "billed_amount": 4800.0,
+        "allowed_amount": 4800.0,
+        "paid_amount": 4800.0,
+        "status": "PAID"
+      }
+    ],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000028",
+    "member_id": "M700028",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0002",
+    "procedure_description": "Care session with limited remaining benefits",
+    "billed_amount": 400.0,
+    "service_date": "2026-05-10",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Remaining annual limit is less than the current billed amount.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0002",
+        "effect": "supports",
+        "quote": "Routine diagnostic blood chemistry and metabolic panel testing includes glucose, electrolyte balance"
+      }
+    ],
+    "missing_items": [],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "STANDARD_REVIEW",
+    "rule_ids": [
+      "R09"
+    ],
+    "injection_flagged": false
+  }
+}

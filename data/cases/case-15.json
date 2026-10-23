@@ -1,0 +1,86 @@
+{
+  "case_id": "CASE-15",
+  "category": "coverage rule unknown",
+  "claim_id": "CLM70000015",
+  "submission_text": "Claim CLM70000015 for PX0010. Member M700015. Coverage rule not configured for plan.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 50000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700015",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [],
+    "claims": [
+      {
+        "claim_id": "CLM70000015",
+        "member_id": "M700015",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0010",
+        "diagnosis_code": "R05",
+        "service_date": "2026-05-10",
+        "submitted_on": "2026-05-20",
+        "billed_amount": 1850.0,
+        "allowed_amount": 1850.0,
+        "paid_amount": null,
+        "status": "SUBMITTED"
+      }
+    ],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000015",
+    "member_id": "M700015",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0010",
+    "procedure_description": "Diagnostic evaluation with unlisted rule",
+    "billed_amount": 1850.0,
+    "service_date": "2026-05-10",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Coverage rule could not be verified in system database.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0010",
+        "effect": "supports",
+        "quote": "Cardiac catheterization and invasive diagnostic angiography covers hemodynamic assessment"
+      }
+    ],
+    "missing_items": [],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "ESCALATE",
+    "rule_ids": [
+      "R02"
+    ],
+    "injection_flagged": false
+  }
+}

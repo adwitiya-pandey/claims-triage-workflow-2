@@ -1,0 +1,94 @@
+{
+  "case_id": "CASE-26",
+  "category": "late filing",
+  "claim_id": "CLM70000026",
+  "submission_text": "Claim CLM70000026 service on 2026-01-01 submitted late on 2026-04-10.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 50000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700026",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [
+      {
+        "plan_id": "PLN001",
+        "procedure_code": "PX0002",
+        "covered": 1,
+        "requires_preauth": 0,
+        "max_allowed": null
+      }
+    ],
+    "claims": [
+      {
+        "claim_id": "CLM70000026",
+        "member_id": "M700026",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0002",
+        "diagnosis_code": "R05",
+        "service_date": "2026-01-01",
+        "submitted_on": "2026-04-10",
+        "billed_amount": 110.0,
+        "allowed_amount": 110.0,
+        "paid_amount": null,
+        "status": "SUBMITTED"
+      }
+    ],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000026",
+    "member_id": "M700026",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0002",
+    "procedure_description": "Untimely filing submission",
+    "billed_amount": 110.0,
+    "service_date": "2026-01-01",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Claim filed exceeding 90-day timely filing period.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0002",
+        "effect": "supports",
+        "quote": "Routine diagnostic blood chemistry and metabolic panel testing includes glucose, electrolyte balance"
+      }
+    ],
+    "missing_items": [],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "STANDARD_REVIEW",
+    "rule_ids": [
+      "R11"
+    ],
+    "injection_flagged": false
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "case_id": "CASE-43",
+  "category": "claim not in the system",
+  "claim_id": "CLM70000043",
+  "submission_text": "Submission for claim CLM70000043 which does not exist in claims database.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 50000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700043",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [
+      {
+        "plan_id": "PLN001",
+        "procedure_code": "PX0001",
+        "covered": 1,
+        "requires_preauth": 0,
+        "max_allowed": null
+      }
+    ],
+    "claims": [],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000043",
+    "member_id": "M700043",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0001",
+    "procedure_description": "Claim missing from system of record",
+    "billed_amount": 150.0,
+    "service_date": "2026-05-10",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Claim record not found in system of record.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0001",
+        "effect": "supports",
+        "quote": "Primary care physician office consultation covers initial and follow-up medical examinations"
+      }
+    ],
+    "missing_items": [],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "ESCALATE",
+    "rule_ids": [
+      "R01"
+    ],
+    "injection_flagged": false
+  }
+}

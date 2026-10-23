@@ -1,0 +1,107 @@
+{
+  "case_id": "CASE-23",
+  "category": "duplicate (1 pending, 1 approved, 1 paid)",
+  "claim_id": "CLM70000023",
+  "submission_text": "Claim CLM70000023 for M700023 identical to already approved claim.",
+  "database": {
+    "plans": [
+      {
+        "plan_id": "PLN001",
+        "plan_name": "Standard PPO",
+        "annual_limit": 50000.0,
+        "deductible": 500.0,
+        "copay_pct": 10.0
+      }
+    ],
+    "members": [
+      {
+        "member_id": "M700023",
+        "plan_id": "PLN001",
+        "age_band": "35-49",
+        "state": "NY",
+        "enrolled_on": "2024-01-01"
+      }
+    ],
+    "providers": [
+      {
+        "provider_id": "PRV7001",
+        "specialty": "General Medicine",
+        "state": "NY",
+        "network_status": "IN_NETWORK"
+      }
+    ],
+    "coverage_rules": [
+      {
+        "plan_id": "PLN001",
+        "procedure_code": "PX0002",
+        "covered": 1,
+        "requires_preauth": 0,
+        "max_allowed": null
+      }
+    ],
+    "claims": [
+      {
+        "claim_id": "CLM70000023",
+        "member_id": "M700023",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0002",
+        "diagnosis_code": "R05",
+        "service_date": "2026-05-10",
+        "submitted_on": "2026-05-20",
+        "billed_amount": 95.0,
+        "allowed_amount": 95.0,
+        "paid_amount": null,
+        "status": "SUBMITTED"
+      },
+      {
+        "claim_id": "CLM70000092",
+        "member_id": "M700023",
+        "provider_id": "PRV7001",
+        "procedure_code": "PX0002",
+        "diagnosis_code": "R05",
+        "service_date": "2026-05-10",
+        "submitted_on": "2026-05-11",
+        "billed_amount": 95.0,
+        "allowed_amount": 95.0,
+        "paid_amount": null,
+        "status": "APPROVED"
+      }
+    ],
+    "claim_notes": []
+  },
+  "gold_extraction": {
+    "claim_id": "CLM70000023",
+    "member_id": "M700023",
+    "provider_id": "PRV7001",
+    "procedure_code": "PX0002",
+    "procedure_description": "Duplicate diagnostic blood testing",
+    "billed_amount": 95.0,
+    "service_date": "2026-05-10",
+    "preauth_reference": null,
+    "documents_present": [
+      "claim_form",
+      "itemized_bill"
+    ],
+    "confidence": 0.95,
+    "unreadable_fields": []
+  },
+  "gold_assessment": {
+    "summary": "Duplicate submission matching previously approved claim.",
+    "clauses": [
+      {
+        "chunk_id": "POL-PX0002",
+        "effect": "supports",
+        "quote": "Routine diagnostic blood chemistry and metabolic panel testing includes glucose, electrolyte balance"
+      }
+    ],
+    "missing_items": [],
+    "confidence": 0.95
+  },
+  "expected": {
+    "route": "ESCALATE",
+    "rule_ids": [
+      "R08"
+    ],
+    "injection_flagged": false
+  }
+}
