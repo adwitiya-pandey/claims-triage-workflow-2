@@ -1,0 +1,43 @@
+[project]
+name = "triage"
+version = "0.1.0"
+description = "LangGraph claims-triage workflow: deterministic rules decide, Gemini extracts, durable human review, eval gates in CI"
+readme = "README.md"
+authors = [
+    { name = "Adwitiya Pandey", email = "76179646+adwitiya-pandey@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "google-genai>=2.31.0",
+    "langgraph>=1.2.16",
+    "langgraph-checkpoint-sqlite>=3.1.2",
+    "mcp>=2.3.0",
+    "pydantic>=2.10.0",
+    "python-dotenv>=1.0.0",
+    "uvicorn>=0.32.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.0",
+    "pytest>=8.0.0",
+    "ruff>=0.8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]
+markers = [
+    "integration: marks tests that require live external services or Project A server",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

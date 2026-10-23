@@ -1,0 +1,7 @@
+{
+  "chat.useAgentsMdFile": true,
+  "chat.useClaudeMdFile": false,
+  "files.eol": "\n",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"]
+}
