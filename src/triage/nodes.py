@@ -645,6 +645,8 @@ def make_nodes(
 
         # Validate human action with strict Pydantic model
         action = ReviewAction.model_validate(resume_value)
+        if state.get("route") == "ESCALATE" and action.action != "CONFIRM":
+            raise ValueError("An ESCALATE recommendation can only be confirmed")
 
         ended_at = datetime.now(timezone.utc).isoformat()
         return {

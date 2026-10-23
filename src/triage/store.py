@@ -31,9 +31,18 @@ CREATE TABLE IF NOT EXISTS reviews (
 """
 
 
-def init_db(db_path: str | Path = "data/triage.db") -> sqlite3.Connection:
+def init_db(
+    target: str | Path | sqlite3.Connection = "data/triage.db",
+) -> sqlite3.Connection:
     """Initialize triage database tables using parameterized schema."""
-    p = Path(db_path)
+    if isinstance(target, sqlite3.Connection):
+        conn = target
+        conn.row_factory = sqlite3.Row
+        conn.executescript(SCHEMA_SQL)
+        conn.commit()
+        return conn
+
+    p = Path(target)
     p.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(p), check_same_thread=False)
     conn.row_factory = sqlite3.Row
