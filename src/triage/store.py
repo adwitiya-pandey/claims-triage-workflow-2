@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -96,18 +97,120 @@ def get_latest_decision(
     row = conn.execute(sql, (claim_id,)).fetchone()
     if row is None:
         return None
-    return json.loads(row["record_json"])
+    return json.loads(row["record_json"])  # type: ignore[no-any-return]
 
 
 def get_all_decisions(
     conn: sqlite3.Connection,
     claim_id: str,
 ) -> list[dict[str, Any]]:
-    """Retrieve all decision versions for claim_id, newest first."""
+    """Retrieve all decision versions for claim_id, oldest first."""
     sql = """
         SELECT record_json FROM decisions
         WHERE claim_id = ?
-        ORDER BY version DESC
+        ORDER BY version ASC
     """
     rows = conn.execute(sql, (claim_id,)).fetchall()
     return [json.loads(r["record_json"]) for r in rows]
+
+
+def get_latest_version(
+    conn: sqlite3.Connection,
+    claim_id: str,
+) -> int:
+    """Return latest decision version number for claim_id, or 0 if none."""
+    sql = "SELECT MAX(version) AS max_v FROM decisions WHERE claim_id = ?"
+    row = conn.execute(sql, (claim_id,)).fetchone()
+    if row is None or row["max_v"] is None:
+        return 0
+    return int(row["max_v"])
+
+
+def create_review(
+    conn: sqlite3.Connection,
+    thread_id: str,
+    claim_id: str,
+    version: int,
+) -> bool:
+    """Create a new awaiting review record in reviews table."""
+    sql = """
+        INSERT OR IGNORE INTO reviews (
+            thread_id,
+            claim_id,
+            version,
+            status,
+            created_at
+        ) VALUES (?, ?, ?, 'awaiting', ?)
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    cur = conn.execute(sql, (thread_id, claim_id, version, now))
+    conn.commit()
+    return cur.rowcount > 0
+
+
+def get_review(
+    conn: sqlite3.Connection,
+    thread_id: str,
+) -> dict[str, Any] | None:
+    """Fetch review record by thread_id."""
+    sql = """
+        SELECT thread_id, claim_id, version, status,
+               created_at, resolved_at, reviewer_id
+        FROM reviews
+        WHERE thread_id = ?
+    """
+    row = conn.execute(sql, (thread_id,)).fetchone()
+    if row is None:
+        return None
+    return dict(row)
+
+
+def get_pending_review_by_claim(
+    conn: sqlite3.Connection,
+    claim_id: str,
+) -> dict[str, Any] | None:
+    """Fetch pending awaiting review for claim_id, if any."""
+    sql = """
+        SELECT thread_id, claim_id, version, status,
+               created_at, resolved_at, reviewer_id
+        FROM reviews
+        WHERE claim_id = ? AND status = 'awaiting'
+        ORDER BY version DESC
+        LIMIT 1
+    """
+    row = conn.execute(sql, (claim_id,)).fetchone()
+    if row is None:
+        return None
+    return dict(row)
+
+
+def list_pending_reviews(
+    conn: sqlite3.Connection,
+) -> list[dict[str, Any]]:
+    """List all pending awaiting reviews ordered by creation date."""
+    sql = """
+        SELECT thread_id, claim_id, version, status,
+               created_at, resolved_at, reviewer_id
+        FROM reviews
+        WHERE status = 'awaiting'
+        ORDER BY created_at ASC
+    """
+    rows = conn.execute(sql).fetchall()
+    return [dict(r) for r in rows]
+
+
+def resolve_review(
+    conn: sqlite3.Connection,
+    thread_id: str,
+    reviewer_id: str,
+) -> bool:
+    """Mark an awaiting review as done with timestamp and reviewer_id."""
+    sql = """
+        UPDATE reviews
+        SET status = 'done', resolved_at = ?, reviewer_id = ?
+        WHERE thread_id = ? AND status = 'awaiting'
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    cur = conn.execute(sql, (now, reviewer_id, thread_id))
+    conn.commit()
+    return cur.rowcount > 0

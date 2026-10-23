@@ -11,6 +11,7 @@ from langgraph.types import Command
 from triage.config import TriageConfig
 from triage.graph import build_graph
 from triage.nodes import NodeDependencies, make_nodes
+from triage.service import TriageService
 from triage.store import init_db
 from triage.tools.base import ToolError
 from triage.tools.fixture_backend import FixtureToolsBackend
@@ -346,11 +347,26 @@ def test_restart_safety_sqlite(tmp_path):
     db_conn.close()
 
 
-@pytest.mark.xfail(
-    reason="Service-level thread de-duplication is implemented in T13 (service.py)"
-)
-def test_rerun_claim_pending_review_no_second_thread():
+def test_rerun_claim_pending_review_no_second_thread(tmp_path):
     """Pending review claim should not spawn a duplicate thread."""
-    from triage.service import triage_claim  # noqa: F401
+    triage_db = tmp_path / "triage.db"
+    cp_db = tmp_path / "checkpoint.db"
+    cfg = TriageConfig(
+        TRIAGE_DB_PATH=str(triage_db),
+        CHECKPOINT_DB_PATH=str(cp_db),
+        LLM_MODE="oracle",
+    )
+    svc = TriageService(config=cfg)
+    r1 = svc.start_triage("CLM70000009")
+    assert r1["status"] == "awaiting_review"
+    thread1 = r1["thread_id"]
 
-    triage_claim("CLM70000009")
+    # Re-running same claim returns existing awaiting thread
+    r2 = svc.start_triage("CLM70000009")
+    assert r2["status"] == "awaiting_review"
+    assert r2["thread_id"] == thread1
+
+    # Verify only one pending review was saved
+    pending = svc.list_pending()
+    assert len(pending) == 1
+    assert pending[0]["thread_id"] == thread1
