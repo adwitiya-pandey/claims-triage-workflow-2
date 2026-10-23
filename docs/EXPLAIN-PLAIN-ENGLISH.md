@@ -77,6 +77,15 @@ This document explains the claims triage workflow in plain, accessible terms wit
 - **Review Question - What CassetteMiss Means and Why Replay Never Falls Back to Live:**
   A `CassetteMiss` means the exact request (canonical SHA-256 hash of the node, model, system prompt, user prompt, and schema) does not exist in the recorded cassette. This is an intentional tripwire: it proves that either a prompt changed, an input changed, or an unexpected call occurred. Replay mode strictly forbids falling back to live API calls so that CI runs remain 100% deterministic, free, and offline. Falling back to live would silently burn API tokens and hide prompt drift or unexpected model queries.
 
+---
+
+## T8: Workflow Nodes (Part 1 - Intake, Extract, Fetch Facts)
+- **What was done:** Implemented `NodeDependencies` and `make_nodes` in `src/triage/nodes.py`:
+  1. `intake`: Validates claim ID, retrieves submission text, scans for injection trips (S2), sanitizes format characters, and records an audit trail step.
+  2. `extract`: Invokes Gemini to extract clinical and administrative fields into Pydantic models with an automatic single validation retry before failing closed (`extraction_failed = True`).
+  3. `fetch_facts`: Calls Project A read-only tools with rate-limit retry, maps `NOT_FOUND` to `claim_missing`, aggregates member YTD history, detects historical duplicates, and re-scans all claim notes for embedded injection attempts.
+
+
 
 
 
