@@ -29,3 +29,6 @@ jobs:
 
       - name: Run offline tests
         run: uv run pytest -q -m "not integration"
+
+      - name: Run oracle evaluation gate
+        run: uv run python -m evals.run_eval --mode oracle

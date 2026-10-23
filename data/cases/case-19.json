@@ -6,7 +6,7 @@
   "database": {
     "plans": [
       {
-        "plan_id": "PLN001",
+        "plan_id": "PLN019",
         "plan_name": "Standard PPO",
         "annual_limit": 50000.0,
         "deductible": 500.0,
@@ -16,7 +16,7 @@
     "members": [
       {
         "member_id": "M700019",
-        "plan_id": "PLN001",
+        "plan_id": "PLN019",
         "age_band": "35-49",
         "state": "NY",
         "enrolled_on": "2024-01-01"
@@ -32,7 +32,7 @@
     ],
     "coverage_rules": [
       {
-        "plan_id": "PLN001",
+        "plan_id": "PLN019",
         "procedure_code": "PX0002",
         "covered": 1,
         "requires_preauth": 0,

@@ -417,8 +417,9 @@ def make_nodes(
         claim_facts = (state.get("facts") or {}).get("claim", {})
         proc_code = claim_facts.get("procedure_code", "")
 
+        query_text = f"{proc_desc} {proc_code}".strip()
         chunks = retrieve(
-            query=proc_desc,
+            query=query_text,
             procedure_code=proc_code,
             top_k=deps.config.TOP_K,
         )

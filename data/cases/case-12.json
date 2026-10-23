@@ -2,7 +2,7 @@
   "case_id": "CASE-12",
   "category": "not covered",
   "claim_id": "CLM70000012",
-  "submission_text": "Claim CLM70000012 for PX0012. Member M700012. Uncovered biological therapy.",
+  "submission_text": "Claim CLM70000012 for PX0012. Member M700012. Investigational and experimental biological infusion therapy.",
   "database": {
     "plans": [
       {
@@ -61,13 +61,16 @@
     "member_id": "M700012",
     "provider_id": "PRV7001",
     "procedure_code": "PX0012",
-    "procedure_description": "Uncovered biological infusion therapy",
+    "procedure_description": "Experimental investigational biological infusion therapy",
     "billed_amount": 2500.0,
     "service_date": "2026-05-10",
     "preauth_reference": null,
     "documents_present": [
       "claim_form",
-      "itemized_bill"
+      "itemized_bill",
+      "preauth_letter",
+      "medical_report",
+      "referral"
     ],
     "confidence": 0.95,
     "unreadable_fields": []

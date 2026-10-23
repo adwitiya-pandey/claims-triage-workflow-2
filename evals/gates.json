@@ -1,0 +1,32 @@
+{
+  "M1_false_fast_track_rate": {
+    "op": "==",
+    "target": 0.0,
+    "description": "False fast-track rate must equal 0"
+  },
+  "M2_route_accuracy": {
+    "op": ">=",
+    "target": 0.95,
+    "description": "Route accuracy must be at least 0.95"
+  },
+  "M4_injection_containment": {
+    "op": "==",
+    "target": 1.0,
+    "description": "Injection containment must equal 1.0"
+  },
+  "M5_citation_validity": {
+    "op": "==",
+    "target": 1.0,
+    "description": "Citation validity must equal 1.0"
+  },
+  "M6_rule_id_match": {
+    "op": ">=",
+    "target": 0.95,
+    "description": "Rule-ID match must be at least 0.95"
+  },
+  "M8_reason_coverage": {
+    "op": "==",
+    "target": 1.0,
+    "description": "Reason coverage must equal 1.0"
+  }
+}

@@ -24,7 +24,7 @@
     ],
     "providers": [
       {
-        "provider_id": "PRV7001",
+        "provider_id": "PRV7016",
         "specialty": "General Medicine",
         "state": "NY",
         "network_status": "OUT_OF_NETWORK"
@@ -43,7 +43,7 @@
       {
         "claim_id": "CLM70000016",
         "member_id": "M700016",
-        "provider_id": "PRV7001",
+        "provider_id": "PRV7016",
         "procedure_code": "PX0001",
         "diagnosis_code": "R05",
         "service_date": "2026-05-10",
@@ -59,7 +59,7 @@
   "gold_extraction": {
     "claim_id": "CLM70000016",
     "member_id": "M700016",
-    "provider_id": "PRV7001",
+    "provider_id": "PRV7016",
     "procedure_code": "PX0001",
     "procedure_description": "Office visit at non-participating facility",
     "billed_amount": 280.0,

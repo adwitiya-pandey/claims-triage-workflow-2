@@ -125,6 +125,35 @@ This document explains the claims triage workflow in plain, accessible terms wit
   2. The `decide` node branches conditionally: if a claim satisfies every single strict criterion for `FAST_TRACK`, it skips the human queue and finalizes immediately. If any anomaly, missing item, high-dollar amount, or risk rule is tripped (`STANDARD_REVIEW` or `ESCALATE`), execution pauses at the `review` node via durable LangGraph `interrupt()`.
   3. Paused workflow state is durably preserved in SQLite checkpointer tables (`checkpoints` and `writes`). If the server reboots or restarts while an analyst is reviewing a packet, the thread state is restored completely from disk. Resuming with a valid human decision executes `finalize` to record an immutable, auditable decision in the database.
 
+---
+
+## T12: MCP Tools Backend and Contract Testing
+- **What was done:** Implemented `McpToolsBackend` adhering to the read-only `ClaimsTools` protocol over streamable HTTP, supporting Bearer authentication, per-call timeouts, and exponential backoff retry solely for `RATE_LIMITED` responses. Added contract test `tests/test_contract_mcp.py` (`@pytest.mark.integration`) and documentation in `docs/running_with_project_a.md`.
+- **Why:** Keeps claims data access strictly isolated behind Project A's audited interface while verifying that live responses match synthetic fixtures identically.
+
+---
+
+## T13: Store Persistence & Idempotency Service
+- **What was done:** Completed `store.py` with append-only `decisions` table queries and `reviews` state tracking. Implemented `TriageService` in `src/triage/service.py` ensuring that resubmitting a claim with a pending review returns the existing awaiting thread without spawning duplicates, version increments cleanly on reprocessing, and graph execution is protected by a thread lock.
+- **Why:** Protects operational integrity against race conditions and guarantees durable idempotency across server restarts.
+
+---
+
+## T14: FastAPI Application & Endpoints
+- **What was done:** Implemented `src/triage/api.py` with endpoints `/health`, `POST /triage`, `GET /reviews/pending`, `POST /reviews/{thread_id}`, and `GET /decisions/{claim_id}`. Added constant-time API key verification, masked error handlers (never leaking raw claim text or Python tracebacks), and CLI entry point in `src/triage/__main__.py`.
+- **Why:** Exposes a secure, production-grade interface for client systems and human review consoles.
+
+---
+
+## T15: Evaluation Harness & Metric Gates
+- **What was done:** Created `evals/run_eval.py` computing metrics M1 through M8 across all 43 scenario cases, defined strict gating thresholds in `evals/gates.json`, built comprehensive gate tests (`tests/test_eval_gates.py`), created `scripts/record_cassettes.py`, and integrated oracle evaluation gating into CI.
+- **Review Question - Explain M1 and Why Its Gate is Zero, Not "Below 5 Percent":**
+  - **Metric Definition (M1 - False Fast-Track Rate):** The proportion of cases whose true adjudication requires human review (`STANDARD_REVIEW` or `ESCALATE`) that were mistakenly routed to `FAST_TRACK`.
+  - **Why the Gate Must Equal Zero:**
+    In health insurance adjudication, `FAST_TRACK` is an autonomous approval and payment pathway where no human eyes inspect the claim before financial settlement. If an unapproved procedure, a non-covered service, a duplicate claim, an out-of-network charge, an annual limit exhaustion, or an adversarial prompt injection is mistakenly routed to `FAST_TRACK`, the insurer will automatically disburse funds illegally or erroneously.
+    Allowing a "5 percent" false fast-track tolerance would mean 1 in every 20 fraudulent, high-risk, or non-covered claims would be paid out automatically without human detection, creating catastrophic financial liability and severe regulatory compliance violations. A zero-tolerance gate ensures that when the system is in doubt, it strictly fails closed to human review.
+
+
 
 
 
