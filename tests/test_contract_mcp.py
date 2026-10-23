@@ -72,6 +72,16 @@ def test_contract_project_a_matches_fixtures():
             )
 
         # 5. Compare get_claim_notes
-        live_notes = live.get_claim_notes(claim_id)
-        fix_notes = fixture.get_claim_notes(claim_id)
-        assert live_notes == fix_notes, f"Mismatch in get_claim_notes for {claim_id}"
+        try:
+            live_notes = live.get_claim_notes(claim_id)
+            fix_notes = fixture.get_claim_notes(claim_id)
+            assert live_notes == fix_notes, (
+                f"Mismatch in get_claim_notes for {claim_id}"
+            )
+        except Exception as e_live:
+            try:
+                fixture.get_claim_notes(claim_id)
+                pytest.fail(f"Live get_claim_notes failed for {claim_id} with {e_live}")
+            except Exception as e_fix:
+                assert type(e_live) is type(e_fix)
+                assert getattr(e_live, "code", "") == getattr(e_fix, "code", "")

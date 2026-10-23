@@ -39,10 +39,10 @@ Copy the printed plaintext key (e.g. `sec_abc123...`).
 Launch Project A over streamable HTTP, pointing to the scenario database:
 ```bash
 CLAIMS_DB_PATH=~/projects/claims-triage-workflow-2/data/scenario.db \
-CLAIMS_HTTP_PORT=8000 \
-uv run python -m claims_mcp --transport http
+CLAIMS_RATE_LIMIT_PER_MIN=10000 \
+uv run python -m claims_mcp --transport http --port 8000
 ```
-The server will bind to `http://127.0.0.1:8000/sse`.
+The server will bind to `http://127.0.0.1:8000/mcp`.
 
 ---
 
@@ -54,7 +54,7 @@ cd ~/projects/claims-triage-workflow-2
 
 Export the MCP connection details and run the integration contract tests:
 ```bash
-CLAIMS_MCP_URL="http://127.0.0.1:8000/sse" \
+CLAIMS_MCP_URL="http://127.0.0.1:8000/mcp" \
 CLAIMS_MCP_KEY="<PLAINTEXT_KEY_FROM_STEP_2>" \
 uv run pytest tests/test_contract_mcp.py -v -m integration
 ```

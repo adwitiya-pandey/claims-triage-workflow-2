@@ -32,3 +32,6 @@ jobs:
 
       - name: Run oracle evaluation gate
         run: uv run python -m evals.run_eval --mode oracle
+
+      - name: Run replay evaluation gate
+        run: uv run python -m evals.run_eval --mode replay
