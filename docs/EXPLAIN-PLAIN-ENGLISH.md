@@ -52,6 +52,25 @@ This document explains the claims triage workflow in plain, accessible terms wit
 - **Review Question - Why the Scan Runs on Original Text While the LLM Sees Sanitized Text:**
   Adversaries intentionally use hidden characters (such as zero-width spaces `\u200b` and soft hyphens `\u00ad`) to disrupt pattern matchers. Scanning the raw original text ensures these hidden characters and formatting tricks trip the `HIDDEN_CHARS` or `PATTERN` alarms immediately, forcing an `ESCALATE` route under Rule R12. Sanitizing the text before sending it to Gemini ensures that if a benign claim is processed, control characters cannot manipulate the LLM tokenizer, bypass prompt delimiters, or inject terminal escape sequences.
 
+---
+
+## T6: Deterministic Rule Engine
+- **What was done:** Implemented `src/triage/rules.py` as a pure function of compiled facts and configurable thresholds (`high_amount`, `filing_days`, `min_conf`). Built comprehensive unit tests (`tests/test_rules.py`) covering all 18 rules (R01..R18), composite hits, early-exit termination, and monotonicity properties.
+- **Review Question - Three Routes, Five Rules, & Early-Stop R12 Reporting:**
+  - **The Three Routes:**
+    1. `FAST_TRACK`: Low-risk claims meeting all coverage, documentation, and valid citation criteria; automated path.
+    2. `STANDARD_REVIEW`: Medium-risk exceptions (e.g. non-covered, out-of-network, missing preauth, late filing) requiring human review.
+    3. `ESCALATE`: High-risk or fail-closed conditions (prompt injection, tool failure, amount >= $10k, record discrepancy, settled claim).
+  - **Five Example Rules:**
+    - `R01`: Claim record not found in system of record (`ESCALATE`).
+    - `R04`: Preauthorisation required by plan rule but reference missing (`STANDARD_REVIEW`).
+    - `R06`: Billed amount exceeds high dollar threshold ($10,000) (`ESCALATE`).
+    - `R10`: Discrepancy between extracted document fields and system record (`ESCALATE`).
+    - `R12`: Prompt injection detected in submission or notes (`ESCALATE`).
+  - **Why R12 Reports Even When Evaluation Stops Early:**
+    If a tool fails or extraction is impossible, the workflow terminates evaluation early to avoid evaluating missing facts. However, security tripwires must never be silenced by external outages or corrupted files. Reporting R12 ensures security incidents are captured in the immutable audit trail and decision record.
+
+
 
 
 
