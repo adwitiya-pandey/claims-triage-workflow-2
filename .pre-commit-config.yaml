@@ -1,0 +1,37 @@
+# .pre-commit-config.yaml
+# See https://pre-commit.com for more information
+# See https://pre-commit.com for more hooks
+
+repos:
+  # 1. Standard File & Syntax Adjustments
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace      # Trims trailing whitespace
+      - id: end-of-file-fixer        # Ensures files end with a newline
+      - id: check-yaml               # Validates YAML syntax
+      - id: check-toml               # Validates TOML syntax
+      - id: check-added-large-files  # Prevents giant files from being committed
+      - id: check-ast                # Verifies that Python files parse as valid syntax
+      - id: debug-statements         # Catches forgotten breakpoint(), pdb, or ipdb statements
+
+  # 2. Security & Secret Scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks                 # Detects hardcoded passwords, API keys, and tokens
+
+  # 3. Python Linting & Formatting (Ruff replaces Black/Flake8/isort)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff                     # Runs the linter (and fixes auto-fixable issues)
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format              # Runs the formatter
+
+  # 4. Static Type Checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.4.0
+    hooks:
+      - id: mypy                     # Validates Type Hints
+        additional_dependencies: [types-requests]
