@@ -2,8 +2,20 @@
 
 from typing import Any
 
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 
-def build_graph(nodes: dict[str, Any], checkpointer: Any = None) -> Any:
+from triage.state import TriageState
+
+
+def _route_after_decide(state: TriageState) -> str:
+    """Conditional router routing FAST_TRACK to finalize and all others to review."""
+    if state.get("route") == "FAST_TRACK":
+        return "finalize"
+    return "review"
+
+
+def build_graph(nodes: dict[str, Any], checkpointer: Any = None) -> CompiledStateGraph:
     """Build and compile the claims triage LangGraph workflow.
 
     Topology (SPEC 5):
@@ -25,11 +37,39 @@ def build_graph(nodes: dict[str, Any], checkpointer: Any = None) -> Any:
            call interrupt(), validate the human response upon resumption,
            and return state updates.
         3. Zero side effects before interrupt() (no DB writes, no logging of actions,
-           no external mutations).
+               no external mutations).
         4. No broad try/except around interrupt().
         5. No while loop around interrupt().
         6. Pass only plain JSON-serialisable values into interrupt().
         7. Resume with Command(resume=...) using the same thread_id.
         8. Never use Command(update=...) as input, and do not use response_schema=.
     """
-    raise NotImplementedError("build_graph is implemented in T11")
+    workflow = StateGraph(TriageState)
+
+    # Register all 8 workflow nodes
+    for name, fn in nodes.items():
+        workflow.add_node(name, fn)
+
+    # Linear upstream pipeline
+    workflow.add_edge(START, "intake")
+    workflow.add_edge("intake", "extract")
+    workflow.add_edge("extract", "fetch_facts")
+    workflow.add_edge("fetch_facts", "retrieve")
+    workflow.add_edge("retrieve", "assess")
+    workflow.add_edge("assess", "decide")
+
+    # Conditional routing after deterministic decision
+    workflow.add_conditional_edges(
+        "decide",
+        _route_after_decide,
+        {
+            "finalize": "finalize",
+            "review": "review",
+        },
+    )
+
+    # Review flows into finalize, and finalize terminates the graph
+    workflow.add_edge("review", "finalize")
+    workflow.add_edge("finalize", END)
+
+    return workflow.compile(checkpointer=checkpointer)

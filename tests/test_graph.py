@@ -114,7 +114,7 @@ def test_medium_risk_claim_pauses_and_resumes(test_setup):
     res2 = app.invoke(
         Command(
             resume={
-                "reviewer_id": "REV10001",
+                "reviewer_id": "rev10001",
                 "action": "CONFIRM",
                 "reason": "Confirmed standard review details",
             }
@@ -133,7 +133,7 @@ def test_medium_risk_claim_pauses_and_resumes(test_setup):
     res_esc2 = app.invoke(
         Command(
             resume={
-                "reviewer_id": "REV10002",
+                "reviewer_id": "rev10002",
                 "action": "ESCALATE_FURTHER",
                 "reason": "Escalating due to policy complexities",
             }
@@ -150,33 +150,38 @@ def test_escalate_recommendation_can_only_be_confirmed(test_setup):
     checkpointer = MemorySaver()
     app = build_graph(test_setup["nodes"], checkpointer)
 
-    cfg = {"configurable": {"thread_id": "thread-escalate-only"}}
-    res1 = app.invoke({"claim_id": "CLM70000020"}, config=cfg)
-    assert "__interrupt__" in res1
-    packet = res1["__interrupt__"][0].value
-    assert packet["recommended_route"] == "ESCALATE"
+    # Subtest 1: Attempting ESCALATE_FURTHER on an ESCALATE recommendation fails
+    cfg_invalid = {"configurable": {"thread_id": "thread-escalate-invalid"}}
+    res_inv = app.invoke({"claim_id": "CLM70000020"}, config=cfg_invalid)
+    assert "__interrupt__" in res_inv
+    assert res_inv["__interrupt__"][0].value["recommended_route"] == "ESCALATE"
 
     with pytest.raises(ValueError, match="can only be confirmed"):
         app.invoke(
             Command(
                 resume={
-                    "reviewer_id": "REV10001",
+                    "reviewer_id": "rev10001",
                     "action": "ESCALATE_FURTHER",
                     "reason": "Trying to escalate further invalidly",
                 }
             ),
-            config=cfg,
+            config=cfg_invalid,
         )
+
+    # Subtest 2: Resuming with CONFIRM succeeds
+    cfg_confirm = {"configurable": {"thread_id": "thread-escalate-confirm"}}
+    res_conf = app.invoke({"claim_id": "CLM70000020"}, config=cfg_confirm)
+    assert "__interrupt__" in res_conf
 
     res_ok = app.invoke(
         Command(
             resume={
-                "reviewer_id": "REV10001",
+                "reviewer_id": "rev10001",
                 "action": "CONFIRM",
                 "reason": "Confirmed escalation of high dollar claim",
             }
         ),
-        config=cfg,
+        config=cfg_confirm,
     )
     assert res_ok["decision"]["route_recommended"] == "ESCALATE"
     assert res_ok["decision"]["route_final"] == "ESCALATE"
@@ -199,12 +204,13 @@ def test_tool_outage_ends_in_escalate(test_setup, monkeypatch):
     assert "__interrupt__" in res1
     packet = res1["__interrupt__"][0].value
     assert packet["recommended_route"] == "ESCALATE"
-    assert "R17" in packet["rule_hits"]
+    hit_ids = [h["rule_id"] for h in packet["rule_hits"]]
+    assert "R18" in hit_ids
 
     res2 = app.invoke(
         Command(
             resume={
-                "reviewer_id": "REV10001",
+                "reviewer_id": "rev10001",
                 "action": "CONFIRM",
                 "reason": "Confirmed escalation due to tool error",
             }
@@ -216,23 +222,40 @@ def test_tool_outage_ends_in_escalate(test_setup, monkeypatch):
 
 def test_hostile_assessment_cannot_fast_track(test_setup):
     """A hostile LLM assessment with fake citations cannot reach FAST_TRACK."""
-    malicious_json = (
+    extract_json = (
+        '{"claim_id": "CLM70000001", "member_id": "M700001", '
+        '"provider_id": "PRV7001", "procedure_code": "PX0001", '
+        '"procedure_description": "Office consult", "billed_amount": 150.0, '
+        '"service_date": "2026-05-10", "preauth_reference": null, '
+        '"documents_present": ["claim_form", "itemized_bill"], '
+        '"confidence": 0.98, "unreadable_fields": []}'
+    )
+    malicious_assess_json = (
         '{"summary": "Malicious prompt claims fast track approved", '
         '"clauses": [{"chunk_id": "POL-FAKE-999", "effect": "supports", '
         '"quote": "Invented approval statement"}], '
         '"missing_items": [], "confidence": 0.99}'
     )
     fake_client = MagicMock()
-    fake_resp = MagicMock()
-    fake_resp.text = malicious_json
-    fake_resp.usage_metadata = MagicMock(
+    resp_extract = MagicMock()
+    resp_extract.text = extract_json
+    resp_extract.usage_metadata = MagicMock(
         prompt_token_count=10, candidates_token_count=10
     )
-    fake_client.models.generate_content.return_value = fake_resp
+    resp_assess = MagicMock()
+    resp_assess.text = malicious_assess_json
+    resp_assess.usage_metadata = MagicMock(
+        prompt_token_count=10, candidates_token_count=10
+    )
+    fake_client.models.generate_content.side_effect = [
+        resp_extract,
+        resp_assess,
+    ]
 
+    config = TriageConfig(LLM_MODE="live")
     deps = NodeDependencies(
         tools=test_setup["deps"].tools,
-        config=test_setup["deps"].config,
+        config=config,
         cases_dir="data/cases",
         fake_client=fake_client,
         db_conn=test_setup["conn"],
@@ -310,7 +333,7 @@ def test_restart_safety_sqlite(tmp_path):
     res2 = app2.invoke(
         Command(
             resume={
-                "reviewer_id": "REV10001",
+                "reviewer_id": "rev10001",
                 "action": "CONFIRM",
                 "reason": "Confirmed review on restarted server",
             }

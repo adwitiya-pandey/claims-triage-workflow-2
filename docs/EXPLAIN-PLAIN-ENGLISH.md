@@ -99,6 +99,33 @@ This document explains the claims triage workflow in plain, accessible terms wit
   
   Because the node executes from the beginning, **any code before the `interrupt()` call runs twice**. This is why the `review` node must have **zero side effects** prior to the `interrupt()` line: no database writes, no network requests, no external mutation, and no trail appending before pause. The node simply constructs the pure JSON review packet, calls `interrupt(packet)`, validates the returned action, and appends the human review result to the audit trail upon resume.
 
+---
+
+## T10: Graph Tests and Topology Contract
+- **What was done:** Created contract tests in `tests/test_graph.py` asserting compiled graph topology, edge routing, fast-track completion without pause, human review pause/resume with `CONFIRM` and `ESCALATE_FURTHER`, escalation locking, early exit on tool outages, hostile assessment handling, crash safety with zero dirty writes, restart durability across SQLite connection cycles, and service thread de-duplication contract.
+- **Why:** Adheres strictly to test-driven development: writing the graph's behavioural contract and verifying failure before wiring the compiled state machine.
+
+---
+
+## T11: LangGraph Workflow Compilation (`build_graph`)
+- **What was done:** Implemented `build_graph` in `src/triage/graph.py` using `StateGraph(TriageState)`, wiring all 8 nodes and edges:
+  ```
+  START -> intake -> extract -> fetch_facts -> retrieve -> assess -> decide
+                                                                      |
+                                           route == FAST_TRACK? ----yes----> finalize -> END
+                                                                      |no
+                                                                      v
+                                                          review (interrupt, durable)
+                                                                      |
+                                                                      v
+                                                                  finalize -> END
+  ```
+- **How the Graph Operates in Plain English:**
+  1. The workflow executes deterministically through data intake, structured LLM extraction, external system fact-checking, policy clause retrieval, LLM clinical assessment, and deterministic rule evaluation.
+  2. The `decide` node branches conditionally: if a claim satisfies every single strict criterion for `FAST_TRACK`, it skips the human queue and finalizes immediately. If any anomaly, missing item, high-dollar amount, or risk rule is tripped (`STANDARD_REVIEW` or `ESCALATE`), execution pauses at the `review` node via durable LangGraph `interrupt()`.
+  3. Paused workflow state is durably preserved in SQLite checkpointer tables (`checkpoints` and `writes`). If the server reboots or restarts while an analyst is reviewing a packet, the thread state is restored completely from disk. Resuming with a valid human decision executes `finalize` to record an immutable, auditable decision in the database.
+
+
 
 
 
