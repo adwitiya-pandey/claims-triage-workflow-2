@@ -85,6 +85,21 @@ This document explains the claims triage workflow in plain, accessible terms wit
   2. `extract`: Invokes Gemini to extract clinical and administrative fields into Pydantic models with an automatic single validation retry before failing closed (`extraction_failed = True`).
   3. `fetch_facts`: Calls Project A read-only tools with rate-limit retry, maps `NOT_FOUND` to `claim_missing`, aggregates member YTD history, detects historical duplicates, and re-scans all claim notes for embedded injection attempts.
 
+---
+
+## T9: Workflow Nodes (Part 2 - Retrieve, Assess, Decide, Review, Finalize)
+- **What was done:**
+  1. `retrieve`: Runs BM25 to rank policy clauses, ensures procedure clause is included, skips if extraction or tool failed.
+  2. `assess`: Invokes Gemini with retrieved clauses, validates clause citations with strict post-checks (checking that cited clauses were actually retrieved and quotes >= 20 characters appear verbatim in the clause text; dropping hallucinated or invalid citations).
+  3. `decide`: Pure deterministic rule evaluation (`rules.py`), setting `route`, `rule_hits`, and `detail_codes`.
+  4. `review`: Prepares a sanitised review packet (containing only clinical/billing summaries, matched rules, and citations, with zero raw claim text), calls `interrupt(packet)` for non-fast-track routes, validates the human reviewer's action (`CONFIRM`, `OVERRIDE`, `ESCALATE_FURTHER`) and note length.
+  5. `finalize`: Assembles the immutable `DecisionRecord`, saves it to SQLite using `store.save_decision` (`INSERT OR IGNORE` for idempotency), and updates state.
+- **Review Question - What Happens to a Node's Code When a Graph Resumes After `interrupt()`:**
+  In LangGraph, when execution pauses at `interrupt(packet)` and is subsequently resumed via `Command(resume=...)` on the same `thread_id`, the node **re-runs from line 1 of the function**. When the execution flow reaches the `interrupt()` call a second time, LangGraph intercepts it and returns the value provided in `resume` instead of pausing.
+  
+  Because the node executes from the beginning, **any code before the `interrupt()` call runs twice**. This is why the `review` node must have **zero side effects** prior to the `interrupt()` line: no database writes, no network requests, no external mutation, and no trail appending before pause. The node simply constructs the pure JSON review packet, calls `interrupt(packet)`, validates the returned action, and appends the human review result to the audit trail upon resume.
+
+
 
 
 
