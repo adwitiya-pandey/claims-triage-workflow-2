@@ -1,0 +1,14 @@
+{
+  "PX0001": ["claim_form", "itemized_bill"],
+  "PX0002": ["claim_form", "itemized_bill"],
+  "PX0003": ["claim_form", "itemized_bill"],
+  "PX0004": ["claim_form", "itemized_bill", "preauth_letter", "medical_report"],
+  "PX0005": ["claim_form", "itemized_bill", "referral"],
+  "PX0006": ["claim_form", "itemized_bill"],
+  "PX0007": ["claim_form", "itemized_bill", "preauth_letter", "referral"],
+  "PX0008": ["claim_form", "itemized_bill", "referral"],
+  "PX0009": ["claim_form", "itemized_bill"],
+  "PX0010": ["claim_form", "itemized_bill", "preauth_letter", "medical_report"],
+  "PX0011": ["claim_form", "itemized_bill", "preauth_letter", "medical_report"],
+  "PX0012": ["claim_form", "itemized_bill", "preauth_letter", "medical_report", "referral"]
+}
