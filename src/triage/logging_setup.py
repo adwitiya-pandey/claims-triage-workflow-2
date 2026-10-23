@@ -17,6 +17,13 @@ ALLOWED_LOG_KEYS = {
     "outcome",
     "rule_ids",
     "detail_codes",
+    "run_id",
+    "node_name",
+    "latency_ms",
+    "token_usage",
+    "cost_usd",
+    "guardrail_triggered",
+    "final_route",
 }
 
 FORBIDDEN_KEYS = {

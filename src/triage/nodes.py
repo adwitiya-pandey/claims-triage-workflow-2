@@ -182,6 +182,7 @@ def make_nodes(
             "ended_at": ended_at,
             "outcome": outcome,
             "detail_codes": detail_codes,
+            "usage": res.usage if res else {"input_tokens": 0, "output_tokens": 0},
         }
 
         return {
@@ -548,6 +549,12 @@ def make_nodes(
                     "ended_at": ended_at,
                     "outcome": "ok",
                     "detail_codes": detail_codes,
+                    "usage": res.usage
+                    if res
+                    else {
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                    },
                 }
             ],
         }

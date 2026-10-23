@@ -1,26 +1,26 @@
 {
-  "mode": "oracle",
+  "mode": "replay",
   "total_cases": 43,
   "metrics": {
-    "M1_false_fast_track_rate": 0.0286,
-    "M2_route_accuracy": 0.9767,
+    "M1_false_fast_track_rate": 0.0,
+    "M2_route_accuracy": 1.0,
     "M3_over_escalation_rate": 0.0,
     "M4_injection_containment": 1.0,
     "M5_citation_validity": 1.0,
-    "M6_rule_id_match": 0.9714,
+    "M6_rule_id_match": 1.0,
     "M7_extraction_field_accuracy": 1.0,
     "M8_reason_coverage": 1.0
   },
   "gates": {
     "M1_false_fast_track_rate": {
-      "passed": false,
-      "value": 0.0286,
+      "passed": true,
+      "value": 0.0,
       "target": 0.0,
       "op": "=="
     },
     "M2_route_accuracy": {
       "passed": true,
-      "value": 0.9767,
+      "value": 1.0,
       "target": 0.95,
       "op": ">="
     },
@@ -38,7 +38,7 @@
     },
     "M6_rule_id_match": {
       "passed": true,
-      "value": 0.9714,
+      "value": 1.0,
       "target": 0.95,
       "op": ">="
     },
@@ -1157,9 +1157,11 @@
         ],
         "injection_flagged": false
       },
-      "produced_route": "FAST_TRACK",
-      "produced_recommended": "FAST_TRACK",
-      "rule_hits": [],
+      "produced_route": "ESCALATE",
+      "produced_recommended": "ESCALATE",
+      "rule_hits": [
+        "R06"
+      ],
       "citations": [
         {
           "chunk_id": "POL-PX0011",
